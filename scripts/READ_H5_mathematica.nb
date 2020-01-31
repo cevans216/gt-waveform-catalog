@@ -1,0 +1,33 @@
+# MATHEMATICA NOTEBOOK TO READ GT-WAVEFORMS IN HDF5 FORMAT
+# Author: Juan Calderon Bustillo (juan.calderon.bustillo@gmail.com)
+# Last Edit: May 31, 2016
+
+my22mode=LMMODE["$PATH_TO_HDF5/GT0001", 2, 2,10,0.1];
+
+LMMODE[repository_, l_, m_,discardedpoints_,sampling_] := Module[{ad, ak, pd, pk, amp, pha, mode},
+
+   ad = Drop[
+     Import[
+      ToString@repository <> ".h5", {"Datasets", 
+       "amp_l" <> ToString@l <> "_m" <> ToString@m <> "/data"}],  discardedpoints];
+
+   ak = Drop[
+     Import[
+      ToString@repository <> ".h5", {"Datasets", 
+       "amp_l" <> ToString@l <> "_m" <> ToString@m <> "/knots"}],  discardedpoints];
+
+   pd = Drop[
+     Import[
+      ToString@repository <> ".h5", {"Datasets", 
+       "phase_l" <> ToString@l <> "_m" <> ToString@m <> "/data"}],  discardedpoints];
+
+   pk = Drop[
+     Import[
+      ToString@repository <> ".h5", {"Datasets", 
+       "phase_l" <> ToString@l <> "_m" <> ToString@m <> "/knots"}],  discardedpoints];
+
+   amp = Interpolation@Transpose[{ak, ad}];
+   pha = Interpolation@Transpose[{pk, pd}];
+   mode = Table[{w, (amp@w)*Exp[I*pha@w]}, {w, ak[[20]], Last@ak, sampling}]
+   ];
+
